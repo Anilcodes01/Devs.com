@@ -6,6 +6,8 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "types": ["formidable"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
