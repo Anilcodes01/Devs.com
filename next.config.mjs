@@ -18,6 +18,12 @@ const nextConfig = {
         sizeLimit: '5mb', // Set the limit that suits your needs
       },
     },
+    webpack: (config, { isServer }) => {
+      if (isServer) {
+        config.externals.push('@prisma/client')
+      }
+      return config
+    },
   };
 
 export default nextConfig;

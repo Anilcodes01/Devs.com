@@ -1,18 +1,17 @@
 import { NextResponse } from 'next/server'
- import prisma from '@/app/lib/prisma'
+   import { PrismaClient } from '@prisma/client'
 
    export async function POST(req: Request) {
+     const prisma = new PrismaClient()
+     
      try {
        const { title, description, content, userId } = await req.json()
-
-       console.log('Received data:', { title, description, content, userId })
 
        const user = await prisma.user.findUnique({
          where: { id: userId },
        })
 
        if (!user) {
-         console.log('User not found')
          return NextResponse.json({ message: 'User not found' }, { status: 404 })
        }
 
@@ -33,8 +32,6 @@ import { NextResponse } from 'next/server'
          },
        })
 
-       console.log('Article created:', newArticle)
-
        return NextResponse.json(
          { message: 'Article created successfully!', newArticle },
          { status: 200 }
@@ -45,5 +42,7 @@ import { NextResponse } from 'next/server'
          { message: 'Error creating article', error: error instanceof Error ? error.message : String(error) },
          { status: 500 }
        )
+     } finally {
+       await prisma.$disconnect()
      }
    }
