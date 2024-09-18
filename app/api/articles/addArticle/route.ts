@@ -1,61 +1,49 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextResponse } from 'next/server'
+ import prisma from '@/app/lib/prisma'
 
-export async function POST(req: Request) {
-  const prisma = new PrismaClient();
+   export async function POST(req: Request) {
+     try {
+       const { title, description, content, userId } = await req.json()
 
-  try {
-    const {
-      title,
-      description,
-      content,
-      userId,
-    }: { title: string; description: string; content: string; userId: string } =
-      await req.json();
+       console.log('Received data:', { title, description, content, userId })
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+       const user = await prisma.user.findUnique({
+         where: { id: userId },
+       })
 
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
+       if (!user) {
+         console.log('User not found')
+         return NextResponse.json({ message: 'User not found' }, { status: 404 })
+       }
 
-    const newArticle = await prisma.article.create({
-      data: {
-        title,
-        description,
-        content,
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            avatarUrl: true,
-          },
-        },
-      },
-    });
+       const newArticle = await prisma.article.create({
+         data: {
+           title,
+           description,
+           content,
+           userId,
+         },
+         include: {
+           user: {
+             select: {
+               name: true,
+               avatarUrl: true,
+             },
+           },
+         },
+       })
 
-    return NextResponse.json(
-      {
-        message: "Article created successfully!",
-        newArticle,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      {
-        message: "Error while creating article",
-        error,
-      },
-      { status: 500 }
-    );
-  }
-}
+       console.log('Article created:', newArticle)
+
+       return NextResponse.json(
+         { message: 'Article created successfully!', newArticle },
+         { status: 200 }
+       )
+     } catch (error) {
+       console.error('Error in /api/articles/addArticle:', error)
+       return NextResponse.json(
+         { message: 'Error creating article', error: error instanceof Error ? error.message : String(error) },
+         { status: 500 }
+       )
+     }
+   }

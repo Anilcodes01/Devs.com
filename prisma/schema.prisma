@@ -24,7 +24,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   posts Post[]
-  aritcles Article[]
+  articles Article[]
 }
 
 model Post {
