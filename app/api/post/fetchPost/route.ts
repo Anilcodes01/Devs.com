@@ -22,6 +22,7 @@ export async function GET() {
         createdAt: "desc",
       },
     });
+    
 
     // Log the fetched posts for debugging
     console.log("Fetched posts:", JSON.stringify(getPosts, null, 2));
@@ -33,8 +34,10 @@ export async function GET() {
       }),
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, max-age=0,proxy-revalidate, must-revalidate", // Disable cache
-          "Content-Type": "application/json", // Ensure the response is JSON
+          "Cache-Control": "no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate",
+          "Content-Type": "application/json",
+          "Pragma": "no-cache",
+          "Expires": "0",
         },
         status: 200,
       }
