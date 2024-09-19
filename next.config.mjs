@@ -15,7 +15,7 @@ const nextConfig = {
     },
     api: {
       bodyParser: {
-        sizeLimit: '5mb', // Set the limit that suits your needs
+        sizeLimit: '5mb',
       },
     },
     webpack: (config, { isServer }) => {
