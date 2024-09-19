@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { FaImage } from "react-icons/fa6";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { LiaPollSolid } from "react-icons/lia";
@@ -12,6 +12,7 @@ import { MdOutlineArticle } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiClickData } from "emoji-picker-react";
+import useSWR from "swr";
 
 interface Post {
   id: string;
@@ -27,9 +28,11 @@ interface Post {
   };
 }
 
+// Fetcher function for SWR
+const fetcher = (url: string) => axios.get(url).then((res) => res.data.getPosts);
+
 export default function MainContent() {
   const { data: session } = useSession();
-  const [posts, setPosts] = useState<Post[]>([]);
   const [postContent, setPostContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,28 +42,11 @@ export default function MainContent() {
   const router = useRouter();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await axios.get(`/api/post/fetchPost?timestamp=${new Date().getTime()}`, {
-        headers: {
-          "Cache-Control": "no-cache",
-        },
-      });
-      if (response.data.getPosts && Array.isArray(response.data.getPosts)) {
-        setPosts(response.data.getPosts);
-      } else {
-        console.error("Unexpected data structure:", response.data);
-        setError("Unexpected data structure received from server");
-      }
-    } catch (error) {
-      console.error("Error fetching posts", error);
-      setError("Failed to fetch posts. Please try again later.");
-    }
-  };
+  // Use SWR for fetching posts
+  const { data: posts, error: fetchError, mutate } = useSWR<Post[]>('/api/post/fetchPost', fetcher, {
+    refreshInterval: 10000, // Optional: Poll every 10 seconds to auto-refresh posts
+    revalidateOnFocus: true,
+  });
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -103,7 +89,8 @@ export default function MainContent() {
       });
 
       if (response.data.createPost && response.data.createPost.id) {
-       fetchPosts();
+        // Mutate to refresh the posts after a new post is created
+        mutate();
         setPostContent("");
         setSelectedImage(null);
         setPreviewUrl(null);
@@ -125,7 +112,7 @@ export default function MainContent() {
   };
 
   if (loading) {
-    return <div>loading...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
@@ -214,7 +201,9 @@ export default function MainContent() {
       </div>
       <div className="mt-8">
         {error && <p className="text-red-500">{error}</p>}
-        {posts.length > 0 ? (
+        {fetchError ? (
+          <p className="text-red-500">Failed to fetch posts</p>
+        ) : posts && posts.length > 0 ? (
           posts.map((post, index) => (
             <PostCard key={post.id ?? `post-${index}`} post={post} />
           ))
