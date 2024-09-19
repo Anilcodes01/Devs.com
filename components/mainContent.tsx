@@ -44,8 +44,9 @@ export default function MainContent() {
 
   // Use SWR for fetching posts
   const { data: posts, error: fetchError, mutate } = useSWR<Post[]>('/api/post/fetchPost', fetcher, {
-    refreshInterval: 10000, // Optional: Poll every 10 seconds to auto-refresh posts
+    refreshInterval: 0, // Optional: Poll every 10 seconds to auto-refresh posts
     revalidateOnFocus: true,
+    revalidateOnReconnect: true,
   });
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
