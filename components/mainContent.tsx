@@ -45,12 +45,11 @@ export default function MainContent() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get("/api/post/fetchPost", {
+      const response = await axios.get(`/api/post/fetchPost?timestamp=${new Date().getTime()}`, {
         headers: {
           "Cache-Control": "no-cache",
         },
       });
-      console.log("Fetch Posts Response:", response.data);
       if (response.data.getPosts && Array.isArray(response.data.getPosts)) {
         setPosts(response.data.getPosts);
       } else {
@@ -104,7 +103,7 @@ export default function MainContent() {
       });
 
       if (response.data.createPost && response.data.createPost.id) {
-        await fetchPosts();
+       fetchPosts();
         setPostContent("");
         setSelectedImage(null);
         setPreviewUrl(null);
