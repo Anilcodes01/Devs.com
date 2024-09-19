@@ -33,7 +33,7 @@ export async function GET() {
       }),
       {
         headers: {
-          "Cache-Control": "no-store, max-age=0 must-revalidate", // Disable cache
+          "Cache-Control": "no-store, no-cache, max-age=0,proxy-revalidate, must-revalidate", // Disable cache
           "Content-Type": "application/json", // Ensure the response is JSON
         },
         status: 200,
