@@ -27,7 +27,6 @@ interface Post {
   };
 }
 
-
 export default function MainContent() {
   const { data: session } = useSession();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -46,7 +45,11 @@ export default function MainContent() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get("/api/post/fetchPost");
+      const response = await axios.get("/api/post/fetchPost", {
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       console.log("Fetch Posts Response:", response.data);
       if (response.data.getPosts && Array.isArray(response.data.getPosts)) {
         setPosts(response.data.getPosts);
@@ -122,8 +125,8 @@ export default function MainContent() {
     setShowEmojiPicker(false);
   };
 
-  if(loading) {
-    return <div>loading...</div>
+  if (loading) {
+    return <div>loading...</div>;
   }
 
   return (
